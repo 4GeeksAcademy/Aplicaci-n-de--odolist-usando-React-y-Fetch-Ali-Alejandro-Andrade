@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/index.css"; // ¡Acuérdate de crear este archivo al lado!
+import "../../styles/index.css";
 
 const Home = () => {
-  // --- VARIABLES DE ESTADO EN ESPAÑOL ---
+  
   const [listaTareas, setListaTareas] = useState([]);
   const [textoNuevaTarea, setTextoNuevaTarea] = useState("");
   
-  // Variables de configuración de la API
+  
   const nombreUsuario = "alesanchezr"; 
   const urlBase = "https://playground.4geeks.com/todo";
 
-  // 1. EFECTO INICIAL: Se ejecuta solo al cargar la página
+  
   useEffect(() => {
     const comprobarYObtenerTareas = async () => {
       try {
-        // Hacemos el GET para ver si existe el usuario y traer las tareas
+        
         const respuesta = await fetch(`${urlBase}/users/${nombreUsuario}`);
         
         if (respuesta.status === 404) {
-          // Si da error 404, significa que el usuario no existe. ¡Lo creamos!
+          
           console.log("El usuario no existe en el servidor. Creando uno nuevo...");
           const respuestaCrear = await fetch(`${urlBase}/users/${nombreUsuario}`, {
             method: "POST"
           });
           if (respuestaCrear.ok) {
-            setListaTareas([]); // Empezamos con la lista vacía
+            setListaTareas([]); 
           }
         } else if (respuesta.ok) {
-          // Si todo está bien, guardamos los datos en nuestro estado
+      
           const datos = await respuesta.json();
           setListaTareas(datos.todos || []);
         }
@@ -39,22 +39,22 @@ const Home = () => {
     comprobarYObtenerTareas();
   }, []);
 
-  // FUNCIÓN AUXILIAR: Para hacer el GET y actualizar la pantalla
+
   const actualizarListaDesdeServidor = async () => {
     try {
       const respuesta = await fetch(`${urlBase}/users/${nombreUsuario}`);
       if (respuesta.ok) {
         const datos = await respuesta.json();
-        setListaTareas(datos.todos || []); // Guardamos las tareas actualizadas
+        setListaTareas(datos.todos || []); 
       }
     } catch (error) {
       console.log("Error al refrescar las tareas: ", error);
     }
   };
 
-  // 2. AGREGAR TAREA: Se activa al pulsar Enter
+
   const funcionAgregarTarea = async (evento) => {
-    // Validamos que sea la tecla Enter y que el texto no esté vacío
+   
     if (evento.key === "Enter" && textoNuevaTarea.trim() !== "") {
       try {
         const respuesta = await fetch(`${urlBase}/todos/${nombreUsuario}`, {
@@ -69,8 +69,8 @@ const Home = () => {
         });
 
         if (respuesta.ok) {
-          setTextoNuevaTarea(""); // Vaciamos el input de la pantalla
-          actualizarListaDesdeServidor(); // Llamamos al GET para actualizar
+          setTextoNuevaTarea(""); 
+          actualizarListaDesdeServidor(); 
         }
       } catch (error) {
         console.log("Error al intentar añadir la tarea: ", error);
@@ -78,7 +78,7 @@ const Home = () => {
     }
   };
 
-  // 3. ELIMINAR TAREA INDIVIDUAL
+
   const funcionEliminarTarea = async (idDeLaTarea) => {
     try {
       const respuesta = await fetch(`${urlBase}/todos/${idDeLaTarea}`, {
@@ -86,14 +86,14 @@ const Home = () => {
       });
 
       if (respuesta.ok) {
-        actualizarListaDesdeServidor(); // Llamamos al GET para actualizar la pantalla
+        actualizarListaDesdeServidor();
       }
     } catch (error) {
       console.log("Error al intentar borrar la tarea: ", error);
     }
   };
 
-  // 4. BOTÓN LIMPIAR TODO (Borra el usuario completo para borrar todo en cascada)
+ 
   const funcionLimpiarTodo = async () => {
     try {
       const respuestaBorrar = await fetch(`${urlBase}/users/${nombreUsuario}`, {
@@ -101,13 +101,13 @@ const Home = () => {
       });
 
       if (respuestaBorrar.ok) {
-        // Como borramos el usuario completo, tenemos que volver a crearlo vacío
+      
         const respuestaCrearNuevo = await fetch(`${urlBase}/users/${nombreUsuario}`, {
           method: "POST"
         });
         
         if (respuestaCrearNuevo.ok) {
-          setListaTareas([]); // Dejamos el front-end totalmente en blanco
+          setListaTareas([]);
           console.log("¡Todas las tareas borradas con éxito!");
         }
       }
@@ -116,7 +116,7 @@ const Home = () => {
     }
   };
 
-  // EL HTML QUE RENDERIZA NUESTRO COMPONENTE
+
   return (
     <div className="contenedor-principal">
       <h1 className="titulo-lista">Todo List</h1>
