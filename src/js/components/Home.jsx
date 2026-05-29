@@ -1,28 +1,171 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import "../../styles/index.css"; // ¡Acuérdate de crear este archivo al lado!
 
-//include images into your bundle
-import rigoImage from "../../img/rigo-baby.jpg";
-
-//create your first component
 const Home = () => {
-	return (
-		<div className="text-center">
-            
+  // --- VARIABLES DE ESTADO EN ESPAÑOL ---
+  const [listaTareas, setListaTareas] = useState([]);
+  const [textoNuevaTarea, setTextoNuevaTarea] = useState("");
+  
+  // Variables de configuración de la API
+  const nombreUsuario = "alesanchezr"; 
+  const urlBase = "https://playground.4geeks.com/todo";
 
-			<h1 className="text-center mt-5">Hello Rigo!</h1>
-			<p>
-				<img src={rigoImage} />
-			</p>
-			<a href="#" className="btn btn-success">
-				If you see this green button... bootstrap is working...
-			</a>
-			<p>
-				Made by{" "}
-				<a href="http://www.4geeksacademy.com">4Geeks Academy</a>, with
-				love!
-			</p>
-		</div>
-	);
+  // 1. EFECTO INICIAL: Se ejecuta solo al cargar la página
+  useEffect(() => {
+    const comprobarYObtenerTareas = async () => {
+      try {
+        // Hacemos el GET para ver si existe el usuario y traer las tareas
+        const respuesta = await fetch(`${urlBase}/users/${nombreUsuario}`);
+        
+        if (respuesta.status === 404) {
+          // Si da error 404, significa que el usuario no existe. ¡Lo creamos!
+          console.log("El usuario no existe en el servidor. Creando uno nuevo...");
+          const respuestaCrear = await fetch(`${urlBase}/users/${nombreUsuario}`, {
+            method: "POST"
+          });
+          if (respuestaCrear.ok) {
+            setListaTareas([]); // Empezamos con la lista vacía
+          }
+        } else if (respuesta.ok) {
+          // Si todo está bien, guardamos los datos en nuestro estado
+          const datos = await respuesta.json();
+          setListaTareas(datos.todos || []);
+        }
+      } catch (error) {
+        console.log("Hubo un error al iniciar la app: ", error);
+      }
+    };
+
+    comprobarYObtenerTareas();
+  }, []);
+
+  // FUNCIÓN AUXILIAR: Para hacer el GET y actualizar la pantalla
+  const actualizarListaDesdeServidor = async () => {
+    try {
+      const respuesta = await fetch(`${urlBase}/users/${nombreUsuario}`);
+      if (respuesta.ok) {
+        const datos = await respuesta.json();
+        setListaTareas(datos.todos || []); // Guardamos las tareas actualizadas
+      }
+    } catch (error) {
+      console.log("Error al refrescar las tareas: ", error);
+    }
+  };
+
+  // 2. AGREGAR TAREA: Se activa al pulsar Enter
+  const funcionAgregarTarea = async (evento) => {
+    // Validamos que sea la tecla Enter y que el texto no esté vacío
+    if (evento.key === "Enter" && textoNuevaTarea.trim() !== "") {
+      try {
+        const respuesta = await fetch(`${urlBase}/todos/${nombreUsuario}`, {
+          method: "POST",
+          body: JSON.stringify({
+            label: textoNuevaTarea,
+            is_done: false
+          }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (respuesta.ok) {
+          setTextoNuevaTarea(""); // Vaciamos el input de la pantalla
+          actualizarListaDesdeServidor(); // Llamamos al GET para actualizar
+        }
+      } catch (error) {
+        console.log("Error al intentar añadir la tarea: ", error);
+      }
+    }
+  };
+
+  // 3. ELIMINAR TAREA INDIVIDUAL
+  const funcionEliminarTarea = async (idDeLaTarea) => {
+    try {
+      const respuesta = await fetch(`${urlBase}/todos/${idDeLaTarea}`, {
+        method: "DELETE"
+      });
+
+      if (respuesta.ok) {
+        actualizarListaDesdeServidor(); // Llamamos al GET para actualizar la pantalla
+      }
+    } catch (error) {
+      console.log("Error al intentar borrar la tarea: ", error);
+    }
+  };
+
+  // 4. BOTÓN LIMPIAR TODO (Borra el usuario completo para borrar todo en cascada)
+  const funcionLimpiarTodo = async () => {
+    try {
+      const respuestaBorrar = await fetch(`${urlBase}/users/${nombreUsuario}`, {
+        method: "DELETE"
+      });
+
+      if (respuestaBorrar.ok) {
+        // Como borramos el usuario completo, tenemos que volver a crearlo vacío
+        const respuestaCrearNuevo = await fetch(`${urlBase}/users/${nombreUsuario}`, {
+          method: "POST"
+        });
+        
+        if (respuestaCrearNuevo.ok) {
+          setListaTareas([]); // Dejamos el front-end totalmente en blanco
+          console.log("¡Todas las tareas borradas con éxito!");
+        }
+      }
+    } catch (error) {
+      console.log("Error al limpiar todo el servidor: ", error);
+    }
+  };
+
+  // EL HTML QUE RENDERIZA NUESTRO COMPONENTE
+  return (
+    <div className="contenedor-principal">
+      <h1 className="titulo-lista">Todo List</h1>
+      
+      <div className="caja-todo">
+        {/* Input para escribir las tareas */}
+        <input
+          type="text"
+          className="entrada-tarea"
+          placeholder="¿Qué tienes que hacer hoy?"
+          value={textoNuevaTarea}
+          onChange={(e) => setTextoNuevaTarea(e.target.value)}
+          onKeyDown={funcionAgregarTarea}
+        />
+
+        {/* Mapeo de la lista de tareas */}
+        <ul className="lista-tareas">
+          {listaTareas.length === 0 ? (
+            <li className="mensaje-vacio">No hay tareas pendientes. ¡A descansar!</li>
+          ) : (
+            listaTareas.map((tarea) => (
+              <li key={tarea.id} className="item-tarea">
+                <span>{tarea.label}</span>
+                <button 
+                  className="boton-eliminar"
+                  onClick={() => funcionEliminarTarea(tarea.id)}
+                >
+                  ✕
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+        
+        {/* Barra inferior con el contador y el botón de borrado masivo */}
+        <div className="pie-pagina">
+          <span>
+            {listaTareas.length} {listaTareas.length === 1 ? "tarea restante" : "tareas restantes"}
+          </span>
+          
+          {listaTareas.length > 0 && (
+            <button className="boton-limpiar-todo" onClick={funcionLimpiarTodo}>
+              Limpiar todo
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Home;

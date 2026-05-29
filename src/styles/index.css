@@ -1,11 +1,117 @@
-/* 
 
-    You can write your own styles here...
-    
-    
-    ...Or you can use the import command to include 
-    other sylesheets into your bunde as well, e.j:
-    
-    import 'relative/path/to/stylesheet.scss';
+body {
+  background-color: gray; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
 
-*/
+
+.contenedor-principal {
+  max-width: 450px;
+  margin: 60px auto; 
+  padding: 10px;
+}
+
+
+.titulo-lista {
+  text-align: center;
+  color: orange;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+
+.caja-todo {
+  background-color: orange;
+  padding: 25px;
+  border-radius: 12px; 
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15); 
+}
+
+
+.entrada-tarea {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #cccccc;
+  border-radius: 6px;
+  box-sizing: border-box; 
+  outline: none; 
+}
+
+.entrada-tarea:focus {
+  border-color: #3498db; 
+}
+
+
+.lista-tareas {
+  list-style: none; 
+  padding: 0;
+  margin: 20px 0 0 0;
+}
+
+
+.item-tarea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 8px;
+  border-bottom: 1px solid #eeeeee; 
+}
+
+
+.item-tarea:hover {
+  background-color: #f9f9f9;
+}
+
+
+.mensaje-vacio {
+  text-align: center;
+  color: black;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+
+.boton-eliminar {
+  background: none;
+  border: none;
+  color: #e74c3c; 
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.boton-eliminar:hover {
+  color: #c0392b;
+  transform: scale(1.2); 
+}
+
+
+.pie-pagina {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 2px solid #f0f2f5;
+  color: #555555;
+  font-size: 14px;
+}
+
+
+.boton-limpiar-todo {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.boton-limpiar-todo:hover {
+  background-color: #c0392b;
+}
